@@ -1,5 +1,14 @@
 import json
-from rank_bm25 import BM25
+import re
+from rank_bm25 import BM25Okapi
+
+def preprocess(doc):
+    """Preprocesses a question
+    Taken from A2.1 assignment
+    """
+    return [
+        term for term in re.sub(r"[^\w]|_", " ", doc).lower().split()
+    ]
 
 def loadData(filelocation):
     """Loads a json training dataset and returns it as a list of dictionaries.
@@ -23,6 +32,21 @@ def writeData(filelocation, dictionary):
     with open(filelocation, "w") as file:
         file.write(json_object)
 
-def rankQuery(query, questions):
-    BM25(query)
+def answerQuery(query, train):
+    """Takes a question and the training dataset and finds the highest score match from the training dataset
+    """
+    bm25 = BM25Okapi(query)
+    score = 0
+    categoryA = ''
+    typeA = ''
+    for j in train:
+        ques = j['question']
+        scores = bm25.get_scores(ques)
+        if scores[0] > score:
+            score = scores[0]
+            categoryA = j['category']
+            typeA = j['type']
+       
+    return categoryA, typeA
+
 
