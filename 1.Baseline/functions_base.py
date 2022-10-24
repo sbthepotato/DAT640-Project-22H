@@ -40,7 +40,7 @@ def answerQuery(query, train):
     except ZeroDivisionError as e:
             print('Zero division while creating instance')
             print(e)
-            return 'boolean', 'boolean'
+            return 'boolean', 'boolean', 0
     score = 0
     categoryA = ''
     typeA = ''
@@ -54,6 +54,6 @@ def answerQuery(query, train):
         except ZeroDivisionError as e:
             print('Zero division while scoring')
             print(e)
-    return categoryA, typeA
+    return categoryA, typeA, score
 
 

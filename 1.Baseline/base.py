@@ -1,4 +1,4 @@
-import base_functions as fun
+import functions_base as fun
 import sys
 import subprocess
 
@@ -6,7 +6,7 @@ if __name__=="__main__":
     # prevents macs from sleeping, hopefully wont affect windows systems ?
     if 'darwin' in sys.platform:
         print('Running \'caffeinate\' on MacOSX to prevent the system from sleeping')
-        subprocess.Popen('caffeinate')
+        subprocess.Popen('caffeinate -d')
     # loads the training dataset into a dict
     dbpedia_train = fun.loadData('../datasets/DBpedia/smarttask_dbpedia_train.json')
     # loads the questions into a dict
@@ -21,7 +21,7 @@ if __name__=="__main__":
     #for i, j in enumerate(dbpedia_questions[:10]):
     for i, j in enumerate(dbpedia_questions):
         question_processed = fun.preprocess(str(j['question']))
-        category, type = fun.answerQuery(question_processed, dbpedia_train)
+        category, type, score = fun.answerQuery(question_processed, dbpedia_train)
         # prints out the progress of question answering, taken from A2.1
         try:
             if (i + 1) % (num_questions // 100) == 0:
@@ -30,6 +30,7 @@ if __name__=="__main__":
             print('something went wrong with the progress printout')
         dbpedia_questions[i]['category'] = category
         dbpedia_questions[i]['type'] = type
+        dbpedia_questions[i]['score'] = score
 
     print('finished answering dataset')
     # writes the dict with answers into the same directory with the test and train files
