@@ -1,6 +1,12 @@
 import base_functions as fun
+import sys
+import subprocess
 
 if __name__=="__main__":
+    # prevents macs from sleeping, hopefully wont affect windows systems ?
+    if 'darwin' in sys.platform:
+        print('Running \'caffeinate\' on MacOSX to prevent the system from sleeping')
+        subprocess.Popen('caffeinate')
     # loads the training dataset into a dict
     dbpedia_train = fun.loadData('../datasets/DBpedia/smarttask_dbpedia_train.json')
     # loads the questions into a dict
