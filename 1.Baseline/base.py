@@ -1,38 +1,25 @@
-import functions_base as fun
-import sys
-import subprocess
+from functions_base import *
+import time
+from datetime import timedelta
 
 if __name__=="__main__":
-    # prevents macs from sleeping, hopefully wont affect windows systems ?
-    if 'darwin' in sys.platform:
-        print('Running \'caffeinate\' on MacOSX to prevent the system from sleeping')
-        subprocess.Popen('caffeinate -d')
-    # loads the training dataset into a dict
-    dbpedia_train = fun.loadData('../datasets/DBpedia/smarttask_dbpedia_train.json')
-    # loads the questions into a dict
-    dbpedia_questions = fun.loadData('../datasets/DBpedia/smarttask_dbpedia_test_questions.json')
-    
-    for i in dbpedia_train:
-        i['question'] = fun.preprocess(str(i['question']))
-    print('finished preprocess train')
-
-    num_questions = len(dbpedia_questions)
-    # quickly comment one or the other in/out to test program on reduced dataset
-    #for i, j in enumerate(dbpedia_questions[:10]):
-    for i, j in enumerate(dbpedia_questions):
-        question_processed = fun.preprocess(str(j['question']))
-        category, type, score = fun.answerQuery(question_processed, dbpedia_train)
-        # prints out the progress of question answering, taken from A2.1
-        try:
-            if (i + 1) % (num_questions // 100) == 0:
-                print(f"{round(100*(i/num_questions))}% answered.")
-        except:
-            print('something went wrong with the progress printout')
-        dbpedia_questions[i]['category'] = category
-        dbpedia_questions[i]['type'] = type
-        dbpedia_questions[i]['score'] = score
-
-    print('finished answering dataset')
+    # start time of program
+    start = time.time()
+    # loads the dbpedia training dataset into a list of dicts
+    dbpedia_train = loadData('../datasets/DBpedia/smarttask_dbpedia_train.json')
+    # loads the wikidata training dataset into a list of dicts
+    wikidata_train = loadData('../datasets/Wikidata/lcquad2_anstype_wikidata_train.json')
+    # adds the training lists together
+    train = dbpedia_train + wikidata_train
+    # loads the questions into a list of dicts
+    dbpedia_questions = loadData('../datasets/DBpedia/smarttask_dbpedia_test_questions.json')
+    # preprocess the training list questions
+    for i in train:
+        i['question'] = preprocess(str(i['question']))
+    # predicts category and type of question list based on training dataset and simple BM25 scoring
+    dbpedia_questions = answerList(dbpedia_questions, train)
     # writes the dict with answers into the same directory with the test and train files
-    fun.writeData('../datasets/DBpedia/smarttask_dbpedia_test_answers.json', dbpedia_questions)
-
+    writeData('../datasets/DBpedia/smarttask_dbpedia_test_answers.json', dbpedia_questions)
+    # runtime for fun
+    end = time.time()
+    print('This program took: ', timedelta(seconds=start-end), ' to run')
