@@ -2,13 +2,10 @@ import json
 import re
 import math
 from rank_bm25 import BM25Okapi
-#import time
 
-# need to import the queue for multiprocessing
-#from base import que
 
 def preprocess(doc):
-    """Preprocesses a question
+    """Preprocesses a document
     Taken from A2.1 assignment
     """
     return [
@@ -49,16 +46,20 @@ def answerQuery(query, train, procNum):
     scoreA = -1.0
     categoryA = 'boolean'
     typeA = 'boolean'
+    # catch any errors to avoid termination
     try:
         bm25 = BM25Okapi(queryP)
     except ZeroDivisionError as e:
         print('Zero division while creating instance in process ', procNum)
-        print('Question id: ', j['id'])
+        print('Question id: ', query['id'])
         print(e)
-        # in case of this error we'll just use a default category, type and score
+        # we'll just use a default category, type and score
         return categoryA, typeA, scoreA
+    # iterate through the training dataset
     for j in train:
+        # compare the query to the entry in the training dataset
         scores = bm25.get_scores(j['question'])
+        # sum the score and compare if it has improved
         scoresSum = math.fsum(scores)
         if scoresSum > scoreA:
             scoreA = scoresSum
@@ -67,15 +68,15 @@ def answerQuery(query, train, procNum):
     return categoryA, typeA, scoreA
 
 
-def answerList(list_Q, train, procNum , retDict):
-    """Takes a list of questions and a list of the training datasets
+def answerList(quesList, train, procNum , retDict):
+    """Takes a list of questions, a list of the training dataset, the process number and the dictionary it will return
     and tries to classify the questions
 
-    Returns a modified list
+    Returns a dictionary with the process id as key with the modified input list as value
     """
-    num_questions = len(list_Q)
+    num_questions = len(quesList)
     # ranges through the questions, we need the iterator to save answers to the list
-    for i, j in enumerate(list_Q):
+    for i, j in enumerate(quesList):
         # answer the question
         category, type, score = answerQuery(j, train, procNum)
         # prints out the progress of question answering, taken from A2.1
@@ -85,7 +86,9 @@ def answerList(list_Q, train, procNum , retDict):
         except:
             # sometimes with a reduced dataset this will freak out and break so we need to catch those errors
             print('something went wrong with the progress printout in process', procNum)
-        list_Q[i]['category'] = category
-        list_Q[i]['type'] = type
-        list_Q[i]['score'] = score
-    retDict[procNum] = list_Q
+        # add the category, type and score to the current question entry
+        quesList[i]['category'] = category
+        quesList[i]['type'] = type
+        quesList[i]['score'] = score
+    # return the dict with the process number as key
+    retDict[procNum] = quesList

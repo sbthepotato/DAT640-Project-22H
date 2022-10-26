@@ -1,4 +1,7 @@
 # lcquad2_smart_task
+
+**Note:** I have not done anything here so this should be considered non operational.
+
 evaluation of answer types of lcquad2 dataset
 
 Input file: data_files/lcquad2_gold_standard.json \
