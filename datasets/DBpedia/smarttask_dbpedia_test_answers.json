@@ -2,26 +2,20 @@
   {
     "id": "dbpedia_16015",
     "question": "How many ingredients are in the grain} ?",
-    "category": "resource",
+    "category": "literal",
     "type": [
-      "dbo:University",
-      "dbo:EducationalInstitution",
-      "dbo:Organisation",
-      "dbo:Agent"
+      "string"
     ],
-    "score": 2.6376840492033438
+    "score": 5.733503840233754
   },
   {
     "id": "dbpedia_3885",
     "question": "Is the case fatality rate of Fournier gangrene fewer than 9.0?",
-    "category": "resource",
+    "category": "literal",
     "type": [
-      "administrative territorial entity of the United States",
-      "first-level administrative country subdivision",
-      "federated state",
-      "constituency"
+      "string"
     ],
-    "score": 6.517812206991692
+    "score": 14.531072627572161
   },
   {
     "id": "dbpedia_12907",
@@ -30,80 +24,110 @@
     "type": [
       "string"
     ],
-    "score": 3.1728187780894825
+    "score": 8.169296245434209
   },
   {
     "id": "dbpedia_7955",
     "question": "What sound does a pig make in the French language?",
-    "category": "resource",
+    "category": "literal",
     "type": [
-      "fictional character"
+      "string"
     ],
-    "score": 2.9490010308742827
+    "score": 12.03553327944975
   },
   {
     "id": "dbpedia_2376",
     "question": "When was Fergie completed his record label in Interscope records?",
     "category": "resource",
     "type": [
-      "dbo:University",
-      "dbo:EducationalInstitution",
-      "dbo:Organisation",
-      "dbo:Agent"
+      "dbo:Country",
+      "dbo:State",
+      "dbo:PopulatedPlace",
+      "dbo:Place",
+      "dbo:Location"
     ],
-    "score": 2.7899543518846155
+    "score": 14.072174631462433
   },
   {
     "id": "dbpedia_4197",
     "question": "Which are the coordinates of easternmost point of Estonia?",
-    "category": "resource",
+    "category": "literal",
     "type": [
-      "dbo:University",
-      "dbo:EducationalInstitution",
-      "dbo:Organisation",
-      "dbo:Agent"
+      "string"
     ],
-    "score": 3.4124876867957594
+    "score": 8.144525835487212
   },
   {
     "id": "dbpedia_22599",
     "question": "Where did the war take place where one of the commander was Zuo Zongtang?",
     "category": "resource",
     "type": [
-      "dbo:Award"
+      "dbo:EthnicGroup"
     ],
-    "score": 1.5634268573211887
+    "score": 13.899222302890653
   },
   {
     "id": "dbpedia_5469",
     "question": "Was Michael Bloomberg a residence in Medford and Allston?",
+    "category": "literal",
+    "type": [
+      "string"
+    ],
+    "score": 9.75588622706393
+  },
+  {
+    "id": "dbpedia_687",
+    "question": "How many platforms does Tomb Raider have?",
+    "category": "literal",
+    "type": [
+      "string"
+    ],
+    "score": 8.07681531833307
+  },
+  {
+    "id": "dbpedia_19677",
+    "question": "Which mountains are contained in Inyo National Forest?",
+    "category": "literal",
+    "type": [
+      "string"
+    ],
+    "score": 7.536557170865367
+  },
+  {
+    "id": "dbpedia_15673",
+    "question": "How many nominations did Lewis Hamilton receive?",
     "category": "resource",
     "type": [
       "dbo:Film",
       "dbo:Work"
     ],
-    "score": 3.2243113154189404
+    "score": 6.436801958033849
   },
   {
-    "id": "dbpedia_687",
-    "question": "How many platforms does Tomb Raider have?",
-    "category": "resource",
+    "id": "dbpedia_11163",
+    "question": "What is the seat of Frankfurter Allgemeine Zeitung, that is adjacent to Wetteraukreis?",
+    "category": "literal",
     "type": [
-      "dbo:University",
-      "dbo:EducationalInstitution",
-      "dbo:Organisation",
-      "dbo:Agent"
+      "string"
     ],
-    "score": 2.723375154222441
+    "score": 16.549830921632132
   },
   {
-    "id": "dbpedia_19677",
-    "question": "Which mountains are contained in Inyo National Forest?",
+    "id": "dbpedia_4173",
+    "question": "Is it true that the points awarded of the 2018 AFL Women's season equals to 2?",
     "category": "resource",
     "type": [
-      "dbo:Person",
-      "dbo:Agent"
+      "dbo:EthnicGroup"
     ],
-    "score": 4.799620354746749
+    "score": 37.53344277500623
+  },
+  {
+    "id": "dbpedia_18169",
+    "question": "Is Microsoft office written in C++",
+    "category": "literal",
+    "type": [
+      "string"
+    ],
+    "score": 3.5672570007852746
   }
 ]

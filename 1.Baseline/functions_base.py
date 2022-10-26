@@ -2,6 +2,10 @@ import json
 import re
 import math
 from rank_bm25 import BM25Okapi
+#import time
+
+# need to import the queue for multiprocessing
+#from base import que
 
 def preprocess(doc):
     """Preprocesses a question
@@ -36,19 +40,20 @@ def writeData(filelocation, dictionary):
         file.write(json_object)
 
 
-def answerQuery(query, train):
+def answerQuery(query, train, procNum):
     """Takes a question and the training dataset and finds the highest score match from the training dataset
 
     Returns the category, type and score of a question
     """
-    queryP = preprocess(str(query))
+    queryP = preprocess(str(query['question']))
     scoreA = -1.0
     categoryA = 'boolean'
     typeA = 'boolean'
     try:
         bm25 = BM25Okapi(queryP)
     except ZeroDivisionError as e:
-        print('Zero division while creating instance')
+        print('Zero division while creating instance in process ', procNum)
+        print('Question id: ', j['id'])
         print(e)
         # in case of this error we'll just use a default category, type and score
         return categoryA, typeA, scoreA
@@ -62,7 +67,7 @@ def answerQuery(query, train):
     return categoryA, typeA, scoreA
 
 
-def answerList(list_Q, train):
+def answerList(list_Q, train, procNum , retDict):
     """Takes a list of questions and a list of the training datasets
     and tries to classify the questions
 
@@ -72,15 +77,15 @@ def answerList(list_Q, train):
     # ranges through the questions, we need the iterator to save answers to the list
     for i, j in enumerate(list_Q):
         # answer the question
-        category, type, score = answerQuery(j['question'], train)
+        category, type, score = answerQuery(j, train, procNum)
         # prints out the progress of question answering, taken from A2.1
         try:
             if (i + 1) % (num_questions // 100) == 0:
-                print(f"{round(100*(i/num_questions))}% answered.")
+                print(f"{round(100*(i/num_questions))}% answered. in process {procNum}")
         except:
             # sometimes with a reduced dataset this will freak out and break so we need to catch those errors
-            print('something went wrong with the progress printout')
+            print('something went wrong with the progress printout in process', procNum)
         list_Q[i]['category'] = category
         list_Q[i]['type'] = type
         list_Q[i]['score'] = score
-    return list_Q
+    retDict[procNum] = list_Q
