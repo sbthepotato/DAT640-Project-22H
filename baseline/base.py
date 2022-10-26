@@ -1,9 +1,10 @@
 from functions_base import *
-import time
-from datetime import timedelta
-import multiprocessing
-import numpy as np
 import os
+import time
+import datetime
+import multiprocessing
+import numpy
+
 
 if __name__=="__main__":
     # start time of program
@@ -25,8 +26,8 @@ if __name__=="__main__":
     nr_cpu = os.cpu_count()
     print(nr_cpu, ' cpu cores detected')
 
-    # splits the questions list into nr_cpu np.arrays
-    split = np.array_split(dbpedia_questions, nr_cpu)
+    # splits the questions list into nr_cpu numpy.arrays
+    split = numpy.array_split(dbpedia_questions, nr_cpu)
     print('Split the questions into ', len(split), ' pieces.')
 
     # creates a list of workers (processes)
@@ -42,10 +43,10 @@ if __name__=="__main__":
     for p in workers:
         p.join()
     
-    ansList = []
     # order the dict based on the process key, shouldn't be necessary but nice to have
     oRetDict = dict(sorted(retDict.items()))
     # take the values from the dict and add them to an answer list
+    ansList = []
     for j in oRetDict.values():
         # the turn the numpy arrays back into a normal list
         ansList += j.tolist()
@@ -54,4 +55,4 @@ if __name__=="__main__":
     writeData('../datasets/DBpedia/smarttask_dbpedia_test_answers_base.json', ansList)
     # runtime for fun
     end = time.time()
-    print('This program took: ', timedelta(seconds=end-start), ' (h:mm:ss:ms) to run')
+    print('This program took: ', datetime.timedelta(seconds=end-start), ' (h:mm:ss:ms) to run')

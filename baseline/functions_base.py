@@ -1,7 +1,7 @@
 import json
 import re
 import math
-from rank_bm25 import BM25Okapi
+import rank_bm25
 
 
 def preprocess(doc):
@@ -48,7 +48,7 @@ def answerQuery(query, train, procNum):
     typeA = 'boolean'
     # catch any errors to avoid termination
     try:
-        bm25 = BM25Okapi(queryP)
+        bm25 = rank_bm25.BM25Okapi(queryP)
     except ZeroDivisionError as e:
         print('Zero division while creating instance in process ', procNum)
         print('Question id: ', query['id'])
