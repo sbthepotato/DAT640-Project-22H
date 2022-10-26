@@ -46,7 +46,7 @@ def answerQuery(query, train, procNum):
     scoreA = -1.0
     categoryA = 'boolean'
     typeA = 'boolean'
-    # catch any errors to avoid termination
+    # catch zerodivision errors to avoid termination
     try:
         bm25 = rank_bm25.BM25Okapi(queryP)
     except ZeroDivisionError as e:

@@ -28,7 +28,7 @@ if __name__=="__main__":
 
     # splits the questions list into nr_cpu numpy.arrays
     split = numpy.array_split(dbpedia_questions, nr_cpu)
-    print('Split the questions into ', len(split), ' pieces.')
+    print('successfully split the questions into ', len(split), ' pieces.')
 
     # creates a list of workers (processes)
     workers = []
