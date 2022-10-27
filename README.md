@@ -1,4 +1,4 @@
-# DAT640 Group Project 2022H Team-001
+# DAT640 Project 2022H Team-001
 
 These are all the files for the project in 'DAT640-Information retrieval and text mining` at UiS in Autumn 2022
 
@@ -6,10 +6,10 @@ These are all the files for the project in 'DAT640-Information retrieval and tex
 
 Each directory has its own README files which explains the file structure and how to run it.
 
-- `analysis` - Contains a Jupyter Notebook which has some basic functions to manually inspect characteristics of the datasets
-- `baseline` - Contains the baseline functions and program to run on the DBpedia dataset
-- `datasets` - Contains all the datasets
-- `evaluate` - Contains the files to evaluate the dataset
+- `./analysis` - Contains a Jupyter Notebook which has some basic functions to manually inspect characteristics of the datasets
+- `./baseline` - Contains the baseline functions and program to run on the DBpedia dataset
+- `./datasets` - Contains all the datasets
+- `./evaluate` - Contains the programs to evaluate the results from both the baseline and the advanced method
 
 ## [SeMantic AnsweR Type (SMART)](https://smart-task.github.io/) prediction [task 2020](https://smart-task.github.io/2020/)
 

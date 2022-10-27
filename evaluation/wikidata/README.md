@@ -1,6 +1,6 @@
 # lcquad2_smart_task
 
-**Note:** I have not done anything here so this should be considered non operational.
+**Note:** I have not done anything here
 
 evaluation of answer types of lcquad2 dataset
 

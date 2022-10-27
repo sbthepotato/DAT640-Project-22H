@@ -1,6 +1,6 @@
 # Datasets
 
-There's nothing to run here but you can look at the DBpedia datasets in the `DBpedia` directory and you can look at the Wikidata datasets in the `Wikidata` directory.
+There's nothing to run here but you can look at the DBpedia datasets in the `./DBpedia` directory and you can look at the Wikidata datasets in the `./Wikidata` directory.
 
 Right now only the DBpedia dataset has been run.
 
