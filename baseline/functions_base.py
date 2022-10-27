@@ -2,15 +2,15 @@ import json
 import re
 import math
 import rank_bm25
+import nltk
 
 
 def preprocess(doc):
     """Preprocesses a document
     Taken from A2.1 assignment
     """
-    return [
-        term for term in re.sub(r"[^\w]|_", " ", doc).lower().split()
-    ]
+    ps = nltk.stem.PorterStemmer()
+    return [ps.stem(term) for term in re.sub(r"[^\w]|_", " ", doc).lower().split()]
 
 
 def loadData(filelocation):

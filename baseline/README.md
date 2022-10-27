@@ -12,10 +12,10 @@ The baseline method is a simple BM25 score on the DBpedia dataset by comparing i
 
 Category prediction (based on 4369 questions)
 
-&emsp;&emsp; Accuracy: 0.336
+&emsp;&emsp; Accuracy: 0.342
 
 Type ranking (based on 4369 questions)
 
-&emsp;&emsp; NDCG@5:  0.106
+&emsp;&emsp; NDCG@5:  0.113
 
-&emsp;&emsp; NDCG@10: 0.105
+&emsp;&emsp; NDCG@10: 0.112
