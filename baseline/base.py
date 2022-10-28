@@ -15,8 +15,8 @@ if __name__=="__main__":
     # loads the questions into a list of dicts
     dbpedia_questions = loadData('../datasets/DBpedia/smarttask_dbpedia_test_questions.json')
     # preprocess the training list questions
-    for i in dbpedia_train:
-        i['question'] = preprocess(str(i['question']))
+    for i, j in enumerate(dbpedia_train):
+        dbpedia_train[i]['question'] = preprocess(str(j['question']))
     
     # creates a manager to return the values from the multiprocessing
     mana = multiprocessing.Manager()
