@@ -6,6 +6,7 @@ These are all the files for the project in 'DAT640-Information retrieval and tex
 
 Each directory has its own README files which explains the file structure and how to run it.
 
+- `./advanced` - Contains all the advanced functions and program to run the the DBpedia dataset
 - `./analysis` - Contains a Jupyter Notebook which has some basic functions to manually inspect characteristics of the datasets
 - `./baseline` - Contains the baseline functions and program to run on the DBpedia dataset
 - `./datasets` - Contains all the datasets
