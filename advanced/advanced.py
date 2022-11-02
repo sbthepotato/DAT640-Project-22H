@@ -14,16 +14,15 @@ if __name__=="__main__":
     dbpedia_train = loadData('../datasets/DBpedia/smarttask_dbpedia_train.json')
     # loads the wikidata training dataset into a list of dicts
     wikidata_train = loadData('../datasets/Wikidata/lcquad2_anstype_wikidata_train.json')
-
+    # combines the 2 training datasets
     train = dbpedia_train + wikidata_train
-
-    for i in train:
-        train['question'] = preprocess(str(i['question']))
+    # preprocess the questions in the training datasets
+    for i, j in enumerate(train):
+        train[i]['question'] = preprocess(str(j['question']))
 
     # loads the questions into a list of dicts
     dbpedia_questions = loadData('../datasets/DBpedia/smarttask_dbpedia_test_questions.json')
 
-    
     # creates a manager to return the values from the multiprocessing
     mana = multiprocessing.Manager()
     retDict = mana.dict()
