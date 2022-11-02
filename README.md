@@ -11,6 +11,7 @@ Each directory has its own README files which explains the file structure and ho
 - `./baseline` - Contains the baseline functions and program to run on the DBpedia dataset
 - `./datasets` - Contains all the datasets
 - `./evaluate` - Contains the programs to evaluate the results from both the baseline and the advanced method
+- `./report` - Contains the project report source files and pdf
 
 ## [SeMantic AnsweR Type (SMART)](https://smart-task.github.io/) prediction [task 2020](https://smart-task.github.io/2020/)
 
