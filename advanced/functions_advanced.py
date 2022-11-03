@@ -3,32 +3,6 @@ import math
 import rank_bm25
 
 
-def answerList(quesList, train, procNum , retDict):
-    """Takes a list of questions, a list of the training dataset, the process number and the dictionary it will return
-    and tries to classify the questions
-
-    Returns a dictionary with the process id as key with the modified input list as value
-    """
-    num_questions = len(quesList)
-    # ranges through the questions, we need the iterator to save answers to the list
-    for i, j in enumerate(quesList):
-        # answer the question
-        category, type, score = answerQuery(j, train, procNum)
-        # prints out the progress of question answering, taken from A2.1
-        try:
-            if (i + 1) % (num_questions // 100) == 0:
-                print(f"{round(100*(i/num_questions))}% answered. in process {procNum}")
-        except:
-            # sometimes with a reduced dataset this will freak out and break so we need to catch those errors
-            print('something went wrong with the progress printout in process', procNum)
-        # add the category, type and score to the current question entry
-        quesList[i]['category'] = category
-        quesList[i]['type'] = type
-        quesList[i]['score'] = score
-    # return the dict with the process number as key
-    retDict[procNum] = quesList
-
-
 def answerQuery(query, train, procNum):
     """Takes a question and the training dataset and finds the highest score match from the training dataset
 

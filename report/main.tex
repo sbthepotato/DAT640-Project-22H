@@ -46,6 +46,8 @@ We describe our solution to the \gls{SMART} prediction task 2020 for the DBpedia
 %% information and builds the first part of the formatted document.
 \maketitle
 
+
+
 \section{Introduction}
 %Explain the context of the problem that you are tackling, including references to relevant literature.
 %% shorten some of the sentences. and maybe increase the introduction length.
@@ -58,6 +60,8 @@ Both datasets follow the same structure and will have a question id, a question 
 
 The goal of this paper is to as accurately as possible classify the category and type of a natural language question.
 
+
+
 \section{Related Works}
 % add some papers from the smart task, only 2 references so far.
 % talk about common methods as well 
@@ -66,7 +70,7 @@ The goal of this paper is to as accurately as possible classify the category and
 A previous submission to the \gls{SMART} task by \citet{Maryland:qwords} from the University of Maryland found that the category of an answer is highly dependent on the question words. They found for example that questions starting with 'Is' or 'Does' always expect a boolean answer and questions starting with 'when' could expect either a number or a date\cite{Maryland:qwords}. A graph showing the most common question words found by this paper can be seen in figure \ref{figure:firstquestionwords}. 
 
 \begin{figure}[h]
-    \includegraphics[width=0.45\textwidth]{figures/firstQuestionWords.png}
+    \includegraphics[width=0.48\textwidth]{figures/firstQuestionWords.png}
     \caption{"First words in sentences from Wikidata and DBpedia datasets" by \citet{Maryland:qwords}}
     \label{figure:firstquestionwords}
 \end{figure}
@@ -75,7 +79,7 @@ A previous submission to the \gls{SMART} task by \citet{Maryland:qwords} from th
 The submission by \citet{Kothen:analysis} from the University of Applied Sciences in Kothen Germany did some analysis on the dataset and found that which types of resources came up most commonly over the whole dataset. This information can be used to weigh the possible answers to try to deduce the correct answer type for a given question\cite{Kothen:analysis}. A graph showing the most common answer types found by this paper can be seen in figure \ref{figure:top10resourceanswertypes}.
 
 \begin{figure}[h]
-    \includegraphics[width=0.45\textwidth]{figures/top10ResourceAnswerTypes.png}
+    \includegraphics[width=0.48\textwidth]{figures/top10ResourceAnswerTypes.png}
     \caption{"TOP 10 resource answer types" by \citet{Kothen:analysis}}
     \label{figure:top10resourceanswertypes}
 \end{figure}
@@ -84,12 +88,6 @@ The submission by \citet{Kothen:analysis} from the University of Applied Science
 A model used frequently used for question classification by previous submissions is \gls{BERT}\cite{maastricht:bert, heraklion:bert, tokyo:bert, uis:bert, Kothen:analysis}. 
 
 \gls{BERT} is an open source machine learning framework used for natural language processing. The model has been pre-trained but also can be fine-tuned with your own datasets. What is unique about BERT is that it can learn bidirectional representations with transformers. This allows for much larger data sets to be analyzed more quickly since words can be processed in relation to all other words at once, instead of one at the time. Additionally by using transformers \gls{BERT} can better understand the context of a word since it compares it to all the other words at once, this makes it extremely capable for text classification tasks such as this.\cite{nvidia:bert}
-
-
-
-%\subsection{DATASETS}
-%According to Nahandama Nihindukulasooriya et al rather than building a benchmark from scratch many datasets for semantic answer type prediction are created from existing academic benchmark for base question answering. In creating answer type prediction gold standards they used QALD-9,LC-QuAD v 1.0 and  LC-QuAD v2.0 datasets. The referenced datasets contain natural language query and a corresponding SPARQL query. Gold standard SPARQL query is used to generate results and analyze them to generate an initial answer type for each query and validating them manually.
-
 
 
 
@@ -164,6 +162,8 @@ trying to weigh answer type based on the first word of a question (who, where, w
 \end{center}
 \end{table}
 
+
+
 \section{Discussion and Conclusions}
 %Summarize and discuss different challenges you faced and how you solved those. Include interpretations of the key facts and trends you observed and pointed out in the Results section. Which method performed best, and why? Speculate: What could you have done differently, and what consequences would that have had?
 
@@ -186,10 +186,12 @@ trying to weigh answer type based on the first word of a question (who, where, w
 \appendix
 \section{GitHub}
 The project code and datasets can be found here:
+
 \href{https://github.com/sbthepotato/DAT640-Project-22H}{github.com/sbthepotato/DAT640-Project-22H}
 
-%\section{Division of Work During the Project}
+\section{Division of Work During the Project}
 
+The whole project was completed by me so this is not relevant.
 % remember to keep this up to date
 %\begin{center}
 %\begin{tabular}{c|c|c|c} 

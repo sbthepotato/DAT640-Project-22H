@@ -1,3 +1,10 @@
+##############################
+# Stupid big files Gitignore #
+##############################
+datasets/DBpedia/instance_types_en.ttl
+
+
+
 ####################
 # MACOS Gitignore #
 ####################
