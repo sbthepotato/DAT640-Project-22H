@@ -2,7 +2,11 @@
 # Stupid big files Gitignore #
 ##############################
 datasets/DBpedia/instance_types_en.ttl
-
+datasets/DBpedia/long_abstracts_en.ttl
+datasets/DBpedia/short_abstracts_en.ttl
+datasets/DBpedia/dbpedia_instance_types.json
+datasets/DBpedia/dbpedia_type_descriptions.json
+datasets/DBpedia/dbpedia_abstracts.json
 
 
 ####################
@@ -34,6 +38,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
 
 ####################
 # Python Gitignore #
