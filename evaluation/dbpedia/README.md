@@ -1,3 +1,6 @@
 # Evaluation Script DBpedia
 
-run `python base_eval.py` to evaluate the base algorithm implementation, This should work out of the box if you have not touched the directory structure as it came.
+- `base_eval.py` evaluate the base algorithm implementation
+- `advanced_eval.py` evaluate the advanced algorithm implementation
+
+Both of these should work out of the box if you have not touched the directory structure as it came.

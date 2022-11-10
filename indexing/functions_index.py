@@ -1,7 +1,10 @@
 import json
 import re
-import nltk
+import pickle
 
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
 
 
 def loadDataTTF(filelocation):
@@ -11,8 +14,21 @@ def loadDataTTF(filelocation):
         list_file = []
         for line in file:
             list_file.append(line)
-        print('loaded ', filelocation)
+        print('Successfully loaded ', filelocation)
         return list_file
+
+
+def loadDataJSON(filelocation):
+    """Loads a json training dataset and returns it as a list of dictionaries.
+    
+    The keys for the instance_types are `id` and `type`
+
+    The keys for abstracts are `id` and `description`
+    """
+    with open(filelocation, 'r', encoding='utf-8') as file:
+        f = json.load(file)
+        print('Successfully loaded ', filelocation)
+        return f
 
 
 def progressPrint(index, length, procnum):
@@ -32,6 +48,8 @@ def splitFunc(a, n):
 
     from: https://stackoverflow.com/a/2135920
     """
+    if n == 1:
+        return a
     k, m = divmod(len(a), n)
     return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
@@ -60,10 +78,10 @@ def processInstanceTypes(file_list, procNum, retDict):
         urls = re.findall(regURL, line)
         # take the id and remove the number at the end
         id = re.sub(r'__\d', '', urls[0])
-        # clean the ud and the type of the uri
-        id = ' '.join(cleanUri(id))
-        #print(id)
-        idtype = cleanUri(urls[2])
+        # clean the id and the type of the uri
+        id = ''.join(cleanUri(id))
+        # split based on # because that means its multiple in one
+        idtype = cleanUri(urls[2]).split('#') 
         # if the id isnt the same as the last one
         if id != previd:
             # then append the last one
@@ -73,17 +91,19 @@ def processInstanceTypes(file_list, procNum, retDict):
             # set the new id
             previd = id
             currentDict['id'] = id
-            currentDict['type'].append(idtype)
+            for j in idtype:
+                currentDict['type'].append(j)
         else:
             # if it is the same then add it but only if that type doesnt already exist.
-            if idtype not in currentDict['type']:
-                currentDict['type'].append(idtype)
+            for j in idtype:
+                if j not in currentDict['type']:
+                    currentDict['type'].append(j)
     print('cpu ', procNum, ' finished processing instance types')
     # don't return the first element cause its empty
     retDict[procNum] = retlist[1:]
 
 
-def processAbstracts(file_list, procNum, retDict):
+def processAbstracts(file_list, questions, procNum, retDict):
     # regex to find stuff inside the urls
     regURL = "<(.*?)>"
     regDesc = ' "(.*?)"@en .'
@@ -98,54 +118,60 @@ def processAbstracts(file_list, procNum, retDict):
         # find all the urls
         url = re.findall(regURL, line)
         # we only want the first one, clean it and join it
-        url = ' '.join(cleanUri(url[0]))
+        url = ''.join(cleanUri(url[0]))
         # find the description
         desc = re.findall(regDesc, line)
         # preprocess and join it back together
-        desc = ' '.join(preprocess(str(desc)))
+        desc = preprocess(str(desc))
         # put it in a dict and add the dict to the return list
-        currentDict= {'id':url, 'description':desc}
-        retlist.append(currentDict)
+        found = False
+        for j in questions:
+            if not found:
+                for word in j['question']:
+                    if len(word) > 4:
+                        if word in desc:
+                            currentDict= {'id':url, 'description': ' '.join(desc)}
+                            retlist.append(currentDict)
+                            found = True
+                            break
+            else:
+                break
     print('cpu ', procNum, ' finished processing abstracts')
     retDict[procNum] = retlist
 
 
-def matchDescToType(descList, typeList, procNum, retDict):
-    """Compares the ID of the typelist and the abstracts list to match the entries,
-
-    returns a dict with a list of dicts with the id, types and description
-    """
-    matchedList = []
-    desc_len = len(descList)
-    for i, j in enumerate(descList):
-        for k, m in enumerate(typeList):
-            if m['id'] == j[0]:
-                m['description'] = j[1]
-                del typeList[k]
-        try:
-            if (i + 1) % (desc_len // 100) == 0:
-                print(f"{round(100*(i/desc_len))}% matched. in process {procNum}")
-        except:
-            # sometimes with a reduced dataset this will freak out and break so we need to catch those errors
-            print('something went wrong with the progress printout in process', procNum)
-
-        matchedList.append(m)
-        
-    retDict[procNum] = matchedList
-
-
 def cleanUri(uri):
     """Cleans a uri and returns a cleaned version
-    Adapted from A3.1
+    Taken from A3.1 assignment
     """
-    return preprocess(uri.split("/")[-1].replace("_", " ").replace('>', ''))
+    return uri.split("/")[-1]
 
 
 def preprocess(doc):
     """Preprocesses a document
+    Taken from A3.1 assignment
+    """
+    # lowercase
+    doc = doc.lower()
+    # remove pattern
+    pattern = r'[^\w]|_", " '
+    doc = re.sub(pattern, ' ',doc)
+    # tokenize
+    doc = word_tokenize(doc)
+    # stopword removal
+    sw =  set(stopwords.words('english'))
+    doc = [word for word in doc if not word in sw]
+    # stemmer
+    ps = PorterStemmer()
+    doc = [ps.stem(word) for word in doc]
+    return doc
+
+
+def preprocessBasic(doc):
+    """Preprocesses a document
     Taken from A2.1 assignment
     """
-    ps = nltk.stem.PorterStemmer()
+    ps = PorterStemmer()
     return [ps.stem(term) for term in re.sub(r"[^\w]|_", " ", doc).lower().split()]
 
 
@@ -159,3 +185,9 @@ def writeDataJSON(filelocation, dictionary):
     with open(filelocation, "w") as file:
         print('Writing to: ', filelocation)
         file.write(json_object)
+
+
+def save_object(obj, filename):
+    with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        print('Writing to: ', filename)
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)

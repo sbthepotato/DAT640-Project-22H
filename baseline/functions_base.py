@@ -3,6 +3,7 @@ import re
 import math
 import rank_bm25
 import nltk
+import pickle
 
 
 def preprocess(doc):
@@ -37,18 +38,41 @@ def writeData(filelocation, dictionary):
         file.write(json_object)
 
 
+def progressPrint(index, length, procnum):
+    """Prints the current progress of processing something for a given process
+    """
+    try:
+        if (index + 1) % (length // 100) == 0:
+            print(f"{round(100*(index/length))}% processed. in process {procnum}")
+    except:
+        print('something went wrong with the progress printout in process', procnum)
+
+
+def splitFunc(a, n):
+    """splits list 'a' into 'n' pieces
+
+    returns a Generator which needs to be converted back to a list
+
+    from: https://stackoverflow.com/a/2135920
+    """
+    if n == 1:
+        return a
+    k, m = divmod(len(a), n)
+    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
+
+
 def answerQuery(query, train, procNum):
     """Takes a question and the training dataset and finds the highest score match from the training dataset
 
     Returns the category, type and score of a question
     """
-    queryP = preprocess(str(query['question']))
+    query = preprocess(str(query['question']))
     scoreA = -1.0
     categoryA = 'boolean'
     typeA = 'boolean'
     # catch zerodivision errors to avoid termination
     try:
-        bm25 = rank_bm25.BM25Okapi(queryP)
+        bm25 = rank_bm25.BM25Okapi(query)
     except ZeroDivisionError as e:
         print('Zero division while creating instance in process ', procNum)
         print('Question id: ', query['id'])
@@ -68,7 +92,7 @@ def answerQuery(query, train, procNum):
     return categoryA, typeA, scoreA
 
 
-def answerList(quesList, train, procNum , retDict):
+def answerList(quesList, train, procNum, retDict):
     """Takes a list of questions, a list of the training dataset, the process number and the dictionary it will return
     and tries to classify the questions
 
@@ -77,18 +101,43 @@ def answerList(quesList, train, procNum , retDict):
     num_questions = len(quesList)
     # ranges through the questions, we need the iterator to save answers to the list
     for i, j in enumerate(quesList):
+        # prints out the progress of question answering, taken from A2.1
+        progressPrint(i, num_questions, procNum)
         # answer the question
         category, type, score = answerQuery(j, train, procNum)
-        # prints out the progress of question answering, taken from A2.1
-        try:
-            if (i + 1) % (num_questions // 100) == 0:
-                print(f"{round(100*(i/num_questions))}% answered. in process {procNum}")
-        except:
-            # sometimes with a reduced dataset this will freak out and break so we need to catch those errors
-            print('something went wrong with the progress printout in process', procNum)
         # add the category, type and score to the current question entry
         quesList[i]['category'] = category
         quesList[i]['type'] = type
         quesList[i]['score'] = score
     # return the dict with the process number as key
     retDict[procNum] = quesList
+
+
+def findTypeIDList(quesList, bm25):
+    length = len(quesList)
+    for i, j in enumerate(quesList):
+        progressPrint(i, length, 0)
+        if j['category'] == 'resource':
+            idx, scoreType = findTypeID(j, bm25)
+            quesList[i]['typeID'] = idx
+            quesList[i]['scoreType'] = scoreType
+    return quesList
+
+
+def findTypeID(query, bm25):
+    query = preprocess(str(query['question']))
+    scoreT = -1.0
+    idx = 0
+    scores = bm25.get_scores(query)
+    for i, j in enumerate(scores):
+        if j > scoreT:
+            idx = i
+            scoreT = j
+    return idx, scoreT
+
+
+def openPickle(filelocation):
+    with open(filelocation, 'rb') as inp:
+        obj = pickle.load(inp)
+        print('Successfully loaded ', filelocation)
+        return obj

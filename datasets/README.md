@@ -1,16 +1,12 @@
 # Datasets
 
-There's nothing to run here but you can look at the DBpedia datasets in the `./DBpedia` directory and you can look at the Wikidata datasets in the `./Wikidata` directory.
+There's nothing to run here but you can look at the DBpedia datasets in the `DBpedia/` directory and you can look at the Wikidata datasets in the `Wikidata/` directory.
 
-Right now only the DBpedia dataset has been run.
+Only the DBpedia dataset is getting indexed and classified.
 
 ## DBpedia
 
-- `smarttask_dbpedia_test_questions.json` - contains the questions that need to be classified
-- `smarttask_dbpedia_test.json` - contains the correct category and type for each question
-- `smarttask_dbpedia_train.json` - contains the training dataset
-- `smarttask_dbpedia_test_answers_base.json` - contains the category and type predictions from the baseline method
-- `smarttask_dbpedia_test_answers_advanced.json` - **#TODO** contains the category and type predictions from the advanced method **#TODO**
+Information about the DBpedia datasets can be found within the `DBpedia/` directory.
 
 ## Wikidata
 

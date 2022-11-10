@@ -27,7 +27,7 @@ if __name__=="__main__":
     retDict = mana.dict()
 
     # counts the cpu cores to decide how many processes to create
-    nr_cpu = os.cpu_count()
+    nr_cpu = min(os.cpu_count(), 16)
     print(nr_cpu, ' cpu cores detected')
 
     # splits the questions list into nr_cpu numpy.arrays
@@ -47,10 +47,10 @@ if __name__=="__main__":
     for p in workers:
         p.join()
     
-    # order the dict based on the process key, shouldn't be necessary but nice to have
+    # sort the ret dict (in case of out of order finish)
     oRetDict = dict(sorted(retDict.items()))
-    # take the values from the dict and add them to an answer list
     ansList = []
+    # take the values from the dict and add them to an answer list
     for j in oRetDict.values():
         # the turn the numpy arrays back into a normal list
         ansList += j.tolist()

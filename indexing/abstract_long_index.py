@@ -1,21 +1,23 @@
 from functions_index import *
-import os
 import time
 import datetime
 import multiprocessing
+
+import nltk
+nltk.download('stopwords')
 
 
 if __name__ =="__main__":
     # start time of program
     start = time.time()
 
-    # counts cpu cores and divides by 2 to decide how many processes to make
-    #nr_cpu = round(os.cpu_count()/2)
+    # how many splits to make
+    nr_splits = 4   
 
     # load the abstracts into a list of dicts
     abstracts = loadDataTTF('../datasets/DBpedia/long_abstracts_en.ttl')
-    # split the instance types, cant use the numpy one because Python just terminates due to lack of memory (lmao)
-    split = list(splitFunc(abstracts, 4))
+    # split the abstracts, cant use the numpy one because Python just terminates due to lack of memory (lmao)
+    split = list(splitFunc(abstracts, nr_splits))
     # clear abstracts from memory
     del abstracts
     # create multiprocessing manager
@@ -25,13 +27,15 @@ if __name__ =="__main__":
     # list of workers
     workers = []
     # for each cpu
-    for i in range(4):
+    for i in range(nr_splits):
         # process the abstracts
-        p = multiprocessing.Process(target=processAbstracts, args=(split[i], i, retDict))
+        p = multiprocessing.Process(target=processAbstracts, args=(split[0], i, retDict))
         # add to the list of workers
         workers.append(p)
         # start worker
         p.start()
+        del split[0]
+    del split
     # wait for workers to finish
     for p in workers:
         p.join()
@@ -42,8 +46,10 @@ if __name__ =="__main__":
         processedList += j 
 
     # write the abstracts to a json file
-    writeDataJSON('../datasets/DBpedia/dbpedia_abstracts.json', processedList)
+    writeDataJSON('../datasets/DBpedia/dbpedia_abstracts_long.json', processedList)
+
 
     # runtime for fun
     end = time.time()
     print('This program took: ', datetime.timedelta(seconds=end-start), ' (h:mm:ss:ms) to run')
+    

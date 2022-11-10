@@ -1,7 +1,11 @@
 from functions_index import *
+import os
 import time
 import datetime
 import multiprocessing
+
+import nltk
+nltk.download('stopwords')
 
 
 if __name__ =="__main__":
@@ -9,14 +13,18 @@ if __name__ =="__main__":
     start = time.time()
 
     # how many splits to make
-    nr_splits = 4
+    nr_splits = 6
 
-    # load the instance types into a list of dicts
-    instanceTypes = loadDataTTF('../datasets/DBpedia/instance_types_en.ttl')
-    # split the instance types
-    split = list(splitFunc(instanceTypes, nr_splits))
-    # clear instancetypes from memory
-    del instanceTypes
+    questions = loadDataJSON('../datasets/DBpedia/smarttask_dbpedia_test_questions.json')
+    for i, j in enumerate(questions):
+        questions[i]['question'] = preprocess(j['question'])
+
+    # load the abstracts into a list of dicts
+    abstracts = loadDataTTF('../datasets/DBpedia/short_abstracts_en.ttl')
+    # split the abstracts, cant use the numpy one because Python just terminates due to lack of memory (lmao)
+    split = list(splitFunc(abstracts, nr_splits))
+    # clear abstracts from memory
+    del abstracts
     # create multiprocessing manager
     mana = multiprocessing.Manager()
     # dict for processes to return to
@@ -25,13 +33,12 @@ if __name__ =="__main__":
     workers = []
     # for each cpu
     for i in range(nr_splits):
-        # process the instance types
-        p = multiprocessing.Process(target=processInstanceTypes, args=(split[0], i, retDict))
+        # process the abstracts
+        p = multiprocessing.Process(target=processAbstracts, args=(split[0], questions, i, retDict))
         # add to the list of workers
         workers.append(p)
         # start worker
         p.start()
-        # clear from memory
         del split[0]
     del split
     # wait for workers to finish
@@ -41,10 +48,11 @@ if __name__ =="__main__":
     sortedRetDict = dict(sorted(retDict.items()))
     processedList = []
     for j in sortedRetDict.values():
-        processedList += j
+        processedList += j 
 
-    # write the instance types to a json file
-    writeDataJSON('../datasets/DBpedia/dbpedia_instance_types.json', processedList)
+
+    # write the abstracts to a json file
+    writeDataJSON('../datasets/DBpedia/dbpedia_abstracts_short.json', processedList)
 
     # runtime for fun
     end = time.time()

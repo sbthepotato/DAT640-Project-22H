@@ -1,7 +1,17 @@
 # Indexing
 
-TODO: finish README
+**NOTE: To run these files some datasets which are not included by default need to be downloaded. Instructions can be found in `../datasets/DBpedia/`**
 
-## Downloading full type dataset
+**NOTE: These use a lot of memory, if python is terminating on its own then you need to decrease the number of splits in the multiprocessing. All files have a `nr_splits` variable near the top of the file. Change this to some lower value and try again if you're having issues.**
 
-The index functions rely on the presense of a file names `instance_types_en.ttl` to exist in `.datasets/DBpedia`. This file is not here by default because it is quite large (748,7MB) so it must be manually downloaded from [downloads.dbpedia](http://downloads.dbpedia.org/2016-10/). The file can be found by going into `core/` and in the `/core/` directory it can be found with the name `instance_types_en.ttl.bz2`. Simply download this file, unzip it and place it in `../datasets/DBpedia`. Then this code should work.
+## Files
+
+- `abstract_long_index.py` - Run this to index the `long_abstracts_en.ttl` file
+- `abstract_short_index.py` - Run this to index the `short_abstracts_en.ttl` file
+- `functions_index.py`  - Contains all the functions used in the indexing files
+- `instance_index.py` - Run this to index the `instace_types_en.ttl` file
+- `requirements.txt` - Required packages, run `pip install -r requirements.txt` to install. For the other files anything above Python 3.7 should work. I used 3.9.13
+
+## Downloading Instance types and Abstracts datasets
+
+Instructions to download the datasets can be found in `../datasets/DBpedia/`

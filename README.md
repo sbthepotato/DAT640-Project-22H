@@ -6,13 +6,13 @@ These are all the files for the project in 'DAT640-Information retrieval and tex
 
 Each directory has its own README files which explains the file structure and how to run it.
 
-- `./advanced` - Contains all the advanced functions and program to run the the DBpedia dataset
-- `./analysis` - Contains a Jupyter Notebook which has some basic functions to manually inspect characteristics of the datasets
-- `./baseline` - Contains the baseline functions and program to run on the DBpedia dataset
-- `./datasets` - Contains all the datasets
-- `./evaluate` - Contains the programs to evaluate the results from both the baseline and the advanced method
-- `./indexing` - Contains the programs to index the type database which handles type prediction
-- `./report` - Contains the project report source files and pdf
+- `advanced/` - Contains all the advanced functions and program to run the the DBpedia dataset
+- `analysis/` - Contains a Jupyter Notebook which has some basic functions to manually inspect characteristics of the datasets
+- `baseline/` - Contains the baseline functions and program to run on the DBpedia dataset
+- `datasets/` - Contains all the datasets
+- `evaluate/` - Contains the programs to evaluate the results from both the baseline and the advanced method
+- `indexing/` - Contains the programs to index the type database which handles type prediction
+- `report/` - Contains the project report source files and pdf
 
 ## [SeMantic AnsweR Type (SMART)](https://smart-task.github.io/) prediction [task 2020](https://smart-task.github.io/2020/)
 
