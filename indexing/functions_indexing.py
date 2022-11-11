@@ -1,11 +1,14 @@
 import json
 import re
-import pickle
+
 
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 
+# Global variables for elastic search multiprocessing and normal multiprocessing
+MAX_CONNECTS = 128
+SPLITS = 8
 
 def loadDataTTF(filelocation):
     """Loads a ttf file and returns it as a list with each line being a new element
@@ -103,7 +106,7 @@ def processInstanceTypes(file_list, procNum, retDict):
     retDict[procNum] = retlist[1:]
 
 
-def processAbstracts(file_list, questions, procNum, retDict):
+def processAbstracts(file_list, procNum, retDict):
     # regex to find stuff inside the urls
     regURL = "<(.*?)>"
     regDesc = ' "(.*?)"@en .'
@@ -124,18 +127,8 @@ def processAbstracts(file_list, questions, procNum, retDict):
         # preprocess and join it back together
         desc = preprocess(str(desc))
         # put it in a dict and add the dict to the return list
-        found = False
-        for j in questions:
-            if not found:
-                for word in j['question']:
-                    if len(word) > 4:
-                        if word in desc:
-                            currentDict= {'id':url, 'description': ' '.join(desc)}
-                            retlist.append(currentDict)
-                            found = True
-                            break
-            else:
-                break
+        currentDict= {'id':url, 'description': ' '.join(desc)}
+        retlist.append(currentDict)
     print('cpu ', procNum, ' finished processing abstracts')
     retDict[procNum] = retlist
 
@@ -167,14 +160,6 @@ def preprocess(doc):
     return doc
 
 
-def preprocessBasic(doc):
-    """Preprocesses a document
-    Taken from A2.1 assignment
-    """
-    ps = PorterStemmer()
-    return [ps.stem(term) for term in re.sub(r"[^\w]|_", " ", doc).lower().split()]
-
-
 def writeDataJSON(filelocation, dictionary):
     """Takes a filelocation and a dictionary and turns it into a json file
         have to make sure when making the dict that its the correct format.
@@ -187,7 +172,10 @@ def writeDataJSON(filelocation, dictionary):
         file.write(json_object)
 
 
-def save_object(obj, filename):
-    with open(filename, 'wb') as outp:  # Overwrites any existing file.
-        print('Writing to: ', filename)
-        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+def reset_index(es, indexname, indexsettings):
+    """Reset Index
+    From A3.1
+    """
+    if es.indices.exists(indexname):
+        es.indices.delete(index=indexname)
+    es.indices.create(index=indexname, body=indexsettings)

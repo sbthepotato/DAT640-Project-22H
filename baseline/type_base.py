@@ -6,6 +6,7 @@ import datetime
 if __name__=="__main__":
     # start time of the program
     start = time.time()
+    print(datetime.datetime.now())
 
     bm25 = openPickle('../datasets/DBpedia/bm25_abstracts.pkl')
     print('loaded the bm25 object')
@@ -13,10 +14,7 @@ if __name__=="__main__":
     # loads the previously categorised dbpedia dataset into a list of dicts
     dbpedia_questions = loadData('../datasets/DBpedia/smarttask_dbpedia_test_answers_base.json')
 
-    # splits the questions list into nr_cpu lists
-    workers = []
-
-    ansList = findTypeIDList(dbpedia_questions[:10], bm25)
+    ansList = findTypeIDList(dbpedia_questions, bm25)
 
     """ abstracts = loadData('../datasets/DBpedia/dbpedia_abstracts_short.json')
 

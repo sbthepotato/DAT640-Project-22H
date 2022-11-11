@@ -3,7 +3,7 @@ import re
 import math
 import rank_bm25
 import nltk
-import pickle
+import datetime
 
 
 def preprocess(doc):
@@ -113,31 +113,21 @@ def answerList(quesList, train, procNum, retDict):
     retDict[procNum] = quesList
 
 
-def findTypeIDList(quesList, bm25):
+# going to be replaced
+def findTypeIDList(quesList, bm25object):
     length = len(quesList)
     for i, j in enumerate(quesList):
         progressPrint(i, length, 0)
         if j['category'] == 'resource':
-            idx, scoreType = findTypeID(j, bm25)
+            print('started resource', datetime.datetime.now())
+            idx = 0
+            scoreT = -1.0
+            best = bm25object.get_top_n(tokenized_query, corpus, n=1)
+            for k, m in enumerate(scores):
+                if m > scoreT:
+                    idx = k
+                    scoreT = m
             quesList[i]['typeID'] = idx
-            quesList[i]['scoreType'] = scoreType
+            quesList[i]['scoreType'] = scoreT
+            print('finished resource', datetime.datetime.now())
     return quesList
-
-
-def findTypeID(query, bm25):
-    query = preprocess(str(query['question']))
-    scoreT = -1.0
-    idx = 0
-    scores = bm25.get_scores(query)
-    for i, j in enumerate(scores):
-        if j > scoreT:
-            idx = i
-            scoreT = j
-    return idx, scoreT
-
-
-def openPickle(filelocation):
-    with open(filelocation, 'rb') as inp:
-        obj = pickle.load(inp)
-        print('Successfully loaded ', filelocation)
-        return obj

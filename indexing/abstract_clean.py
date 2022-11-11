@@ -1,4 +1,4 @@
-from functions_index import *
+from functions_indexing import *
 import time
 import datetime
 import multiprocessing
@@ -11,29 +11,28 @@ if __name__ =="__main__":
     # start time of program
     start = time.time()
 
-    # how many splits to make
-    nr_splits = 4   
+    # load the abstracts into a list of strings
+    abstracts = loadDataTTF('../datasets/DBpedia/short_abstracts_en.ttl')
 
-    # load the abstracts into a list of dicts
-    abstracts = loadDataTTF('../datasets/DBpedia/long_abstracts_en.ttl')
     # split the abstracts, cant use the numpy one because Python just terminates due to lack of memory (lmao)
-    split = list(splitFunc(abstracts, nr_splits))
+    split = list(splitFunc(abstracts, SPLITS))
     # clear abstracts from memory
     del abstracts
+
     # create multiprocessing manager
     mana = multiprocessing.Manager()
     # dict for processes to return to
     retDict = mana.dict()
     # list of workers
     workers = []
-    # for each cpu
-    for i in range(nr_splits):
+    for i in range(SPLITS):
         # process the abstracts
         p = multiprocessing.Process(target=processAbstracts, args=(split[0], i, retDict))
         # add to the list of workers
         workers.append(p)
         # start worker
         p.start()
+        # clear from memory
         del split[0]
     del split
     # wait for workers to finish
@@ -45,9 +44,9 @@ if __name__ =="__main__":
     for j in sortedRetDict.values():
         processedList += j 
 
-    # write the abstracts to a json file
-    writeDataJSON('../datasets/DBpedia/dbpedia_abstracts_long.json', processedList)
 
+    # write the abstracts to a json file
+    writeDataJSON('../datasets/DBpedia/dbpedia_abstracts_short.json', processedList)
 
     # runtime for fun
     end = time.time()
