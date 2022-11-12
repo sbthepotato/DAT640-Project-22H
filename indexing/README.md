@@ -35,3 +35,13 @@ Besides the presence of elasticsearch in the `requirements.txt` file it also nee
 ## Downloading Instance types and Abstracts datasets
 
 Instructions to download the datasets can be found in `../datasets/DBpedia/`
+
+## Logic of the order
+
+`train_index.py` doesn't rely on any of the other files and no files rely on it so technically it doesn't matter. I put it first in the list just because.
+
+`instance_clean.py` will clean the `instance_types_en.ttl` file. It does this by extracting the first element which is the ID of the type. It also removes number at the end of it in case of it having multiple types and combines the types into a single element. This has to be run before `instances_index.py` because `instances_index.py` reads the cleaned output file from `instance_types_en.ttl`.
+
+`abstract_clean.py` cleans the `long_abstracts_en.ttl` file. it also extracts the first element as the ID and then preprocesses the 3rd field as the description.
+
+The important thing is that `abstracts_index.py` is run after all these other files because it relies both on the `abstracts_clean.py` to have been run and the `instances_index.py`. This is because we will only index entries which actually have types associated with them since they're the only ones we're interested in. We only know which ID's have types after running the `instances_index.py`.

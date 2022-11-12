@@ -16,11 +16,13 @@ Each directory has its own README files which explains the file structure and ho
 
 ## Elasticsearch
 
-The indexing of some of the large datasets in this assignment is done using elasticsearch. Besides the pip package requirement, which can be found in the `requirements.txt` file in the relevant directories, elasticsearch also needs to be separately downloaded and run.
+The indexing of some of the large datasets in this assignment is done using Elasticsearch. Besides the pip package requirement, which can be found in the `requirements.txt` file in the relevant directories, Elasticsearch also needs to be separately downloaded and run.
 
 The version used in this project is `7.17.6` which can be downloaded from [here](https://www.elastic.co/downloads/past-releases/elasticsearch-7-17-6). if the link breaks for whatever reason googling 'elasticsearch 7.17.6' should find it.
 
-After downloading it, unzip it, go into the `bin/` directory in the command line and run the `elsticsearch` file. Instructions can also be found [here](https://www.elastic.co/guide/en/elasticsearch/reference/current/starting-elasticsearch.html). **Elasticsearch must be actively running for a lot of the files in this project to work.**
+After downloading it, unzip it, go into the `bin/` directory in the command line and run the `elsticsearch` file. Instructions can also be found [here](https://www.elastic.co/guide/en/elasticsearch/reference/current/starting-elasticsearch.html).
+
+**Elasticsearch must be actively running for a lot of the files in this project to work.**
 
 ## [SeMantic AnsweR Type (SMART)](https://smart-task.github.io/) prediction [task 2020](https://smart-task.github.io/2020/)
 

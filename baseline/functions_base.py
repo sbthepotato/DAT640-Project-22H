@@ -1,12 +1,7 @@
 import json
 import re
 import nltk
-import os 
-
 from elasticsearch import Elasticsearch
-
-# Global variables for multiprocessing
-SPLITS = min(os.cpu_count(), 8)
 
 # defines as a global variable for the multiprocessing
 es = Elasticsearch(maxsize=128, timeout=64, max_retries=16, retry_on_timeout=True)
@@ -55,6 +50,13 @@ def progressPrint(index, length, procnum):
     except:
         print('something went wrong with the progress printout in process', procnum)
 
+
+#######################################
+#                                     #
+# The functions below this point are  #
+# used to actually answer the dataset #
+#                                     #
+#######################################
 
 def answerList(quesList, procNum, retDict):
     """Answers a list of questions
