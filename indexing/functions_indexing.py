@@ -1,14 +1,19 @@
 import json
 import re
-
+import os
+from elasticsearch import Elasticsearch
 
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 
-# Global variables for elastic search multiprocessing and normal multiprocessing
-MAX_CONNECTS = 128
-SPLITS = 8
+# Global variables for multiprocessing, clean is for the cleaning files and index is for the indexing files
+SPLITS_clean = min(os.cpu_count(), 8)
+SPLITS_index = 32
+
+# defines as a global variable for the multiprocessing
+es = Elasticsearch(maxsize=128, timeout=64, max_retries=16, retry_on_timeout=True)
+
 
 def loadDataTTF(filelocation):
     """Loads a ttf file and returns it as a list with each line being a new element
@@ -34,6 +39,18 @@ def loadDataJSON(filelocation):
         return f
 
 
+def writeDataJSON(filelocation, dictionary):
+    """Takes a filelocation and a dictionary and turns it into a json file
+        have to make sure when making the dict that its the correct format.
+    """
+    # set the indent so that it looks pretty
+    json_object = json.dumps(dictionary, indent=2)
+    # open the file and write to it
+    with open(filelocation, "w") as file:
+        print('Writing to: ', filelocation)
+        file.write(json_object)
+
+
 def progressPrint(index, length, procnum):
     """Prints the current progress of processing something for a given process
     """
@@ -55,6 +72,41 @@ def splitFunc(a, n):
         return a
     k, m = divmod(len(a), n)
     return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
+
+
+def cleanUri(uri):
+    """Cleans a uri and returns a cleaned version
+    Taken from A3.1 assignment
+    """
+    return uri.split("/")[-1]
+
+
+def preprocess(doc):
+    """Preprocesses a document
+    Taken from A3.1 assignment
+    """
+    # lowercase
+    doc = doc.lower()
+    # remove pattern
+    pattern = r'[^\w]|_", " '
+    doc = re.sub(pattern, ' ',doc)
+    # tokenize
+    doc = word_tokenize(doc)
+    # stopword removal
+    sw =  set(stopwords.words('english'))
+    doc = [word for word in doc if not word in sw]
+    # stemmer
+    ps = PorterStemmer()
+    doc = [ps.stem(word) for word in doc]
+    return doc
+
+
+def preprocessBasic(doc):
+    """Preprocesses a document
+    Taken from A2.1 assignment
+    """
+    ps = PorterStemmer()
+    return [ps.stem(term) for term in re.sub(r"[^\w]|_", " ", doc).lower().split()]
 
 
 def processInstanceTypes(file_list, procNum, retDict):
@@ -133,45 +185,6 @@ def processAbstracts(file_list, procNum, retDict):
     retDict[procNum] = retlist
 
 
-def cleanUri(uri):
-    """Cleans a uri and returns a cleaned version
-    Taken from A3.1 assignment
-    """
-    return uri.split("/")[-1]
-
-
-def preprocess(doc):
-    """Preprocesses a document
-    Taken from A3.1 assignment
-    """
-    # lowercase
-    doc = doc.lower()
-    # remove pattern
-    pattern = r'[^\w]|_", " '
-    doc = re.sub(pattern, ' ',doc)
-    # tokenize
-    doc = word_tokenize(doc)
-    # stopword removal
-    sw =  set(stopwords.words('english'))
-    doc = [word for word in doc if not word in sw]
-    # stemmer
-    ps = PorterStemmer()
-    doc = [ps.stem(word) for word in doc]
-    return doc
-
-
-def writeDataJSON(filelocation, dictionary):
-    """Takes a filelocation and a dictionary and turns it into a json file
-        have to make sure when making the dict that its the correct format.
-    """
-    # set the indent so that it looks pretty
-    json_object = json.dumps(dictionary, indent=2)
-    # open the file and write to it
-    with open(filelocation, "w") as file:
-        print('Writing to: ', filelocation)
-        file.write(json_object)
-
-
 def reset_index(es, indexname, indexsettings):
     """Reset Index
     From A3.1
@@ -179,3 +192,25 @@ def reset_index(es, indexname, indexsettings):
     if es.indices.exists(indexname):
         es.indices.delete(index=indexname)
     es.indices.create(index=indexname, body=indexsettings)
+
+
+def elastic_index(doc, indexname, procNum):
+    length = len(doc)
+    for i, j in enumerate(doc):
+        progressPrint(i, length, procNum)
+        es.index(index=indexname, id=j['id'], document=j)
+    print('finished process ', procNum)
+
+
+def elastic_index_abstracts(doc, indexname, procNum):
+    length = len(doc)
+    notFound = 0
+    for i, j in enumerate(doc):
+        progressPrint(i, length, procNum)
+        try:
+            types = es.get(id=j['id'], index='instances')['_source']['type']
+            j['type'] = types
+            es.index(index=indexname, id=j['id'], document=j)
+        except:
+            notFound += 1
+    print('finished process ', procNum, ' Abstracts that failed to find an instance: ', notFound)

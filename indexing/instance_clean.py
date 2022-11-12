@@ -8,13 +8,10 @@ if __name__ =="__main__":
     # start time of program
     start = time.time()
 
-    # how many splits to make
-    nr_splits = 4
-
     # load the instance types into a list of dicts
     instanceTypes = loadDataTTF('../datasets/DBpedia/instance_types_en.ttl')
     # split the instance types
-    split = list(splitFunc(instanceTypes, nr_splits))
+    split = list(splitFunc(instanceTypes, SPLITS_clean))
     # clear instancetypes from memory
     del instanceTypes
     # create multiprocessing manager
@@ -24,7 +21,7 @@ if __name__ =="__main__":
     # list of workers
     workers = []
     # for each cpu
-    for i in range(nr_splits):
+    for i in range(SPLITS_clean):
         # process the instance types
         p = multiprocessing.Process(target=processInstanceTypes, args=(split[0], i, retDict))
         # add to the list of workers

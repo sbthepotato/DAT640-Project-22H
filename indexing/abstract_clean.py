@@ -12,10 +12,11 @@ if __name__ =="__main__":
     start = time.time()
 
     # load the abstracts into a list of strings
-    abstracts = loadDataTTF('../datasets/DBpedia/short_abstracts_en.ttl')
+    #abstracts = loadDataTTF('../datasets/DBpedia/short_abstracts_en.ttl')
+    abstracts = loadDataTTF('../datasets/DBpedia/long_abstracts_en.ttl')
 
     # split the abstracts, cant use the numpy one because Python just terminates due to lack of memory (lmao)
-    split = list(splitFunc(abstracts, SPLITS))
+    split = list(splitFunc(abstracts, SPLITS_clean))
     # clear abstracts from memory
     del abstracts
 
@@ -25,7 +26,7 @@ if __name__ =="__main__":
     retDict = mana.dict()
     # list of workers
     workers = []
-    for i in range(SPLITS):
+    for i in range(SPLITS_clean):
         # process the abstracts
         p = multiprocessing.Process(target=processAbstracts, args=(split[0], i, retDict))
         # add to the list of workers
@@ -44,9 +45,8 @@ if __name__ =="__main__":
     for j in sortedRetDict.values():
         processedList += j 
 
-
     # write the abstracts to a json file
-    writeDataJSON('../datasets/DBpedia/dbpedia_abstracts_short.json', processedList)
+    writeDataJSON('../datasets/DBpedia/dbpedia_abstracts.json', processedList)
 
     # runtime for fun
     end = time.time()

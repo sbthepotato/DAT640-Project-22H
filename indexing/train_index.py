@@ -3,23 +3,28 @@ import time
 import datetime
 import multiprocessing
 
-# name of the index, change which one is commented if you want to change which one to index
-INDEX_NAME = 'abstracts'
+# name of the index
+INDEX_NAME = 'train'
 
 # settings for how it should look like
 INDEX_SETTINGS = {
     "mappings": {
         "properties": {
-            "description": {
+            "question": {
                 "type": "text", 
                 "term_vector": "yes", 
                 "analyzer": "english"
             },
+            "category": {
+                "type": "text", 
+                "term_vector": "no", 
+                "analyzer": "keyword"
+            },
             "type": {
                 "type": "text", 
-                "term_vector": "yes", 
+                "term_vector": "no", 
                 "analyzer": "keyword"
-            }
+            },
         }
     }
 }
@@ -35,24 +40,32 @@ if __name__=="__main__":
     # reset the index since we're making a new one
     reset_index(es, INDEX_NAME, INDEX_SETTINGS)
 
-    # load the abstracts, change which one is commented if you want to change which one to index
-    abstracts = loadDataJSON('../datasets/DBpedia/dbpedia_abstracts.json')
+    # load the training datasets
+    dbpedia_train = loadDataJSON('../datasets/DBpedia/smarttask_dbpedia_train.json')
+    wikidata_train = loadDataJSON('../datasets/Wikidata/lcquad2_anstype_wikidata_train.json')
+    # combine the lists
+    train = dbpedia_train + wikidata_train
+    del dbpedia_train
+    del wikidata_train
+
+    for i, j in enumerate(train):
+        train[i]['question'] = ' '.join(preprocessBasic(str(j['question'])))
+
 
     # split them into SPLITS new lists
-    split = list(splitFunc(abstracts, SPLITS_index))
+    split = list(splitFunc(train, SPLITS))
     # clear from memory
-    del abstracts
+    del train
 
     # creates a list of workers (processes)
     workers = []
-    for i in range(SPLITS_index):
-        # indexes the abstracts
-        p = multiprocessing.Process(target=elastic_index_abstracts, args=(split[0], INDEX_NAME, i, ))
+    for i in range(SPLITS):
+        # indexes the training datasets
+        p = multiprocessing.Process(target=elastic_index, args=(split[i], INDEX_NAME, i, ))
         # add to the list of workers
         workers.append(p)
         # start the worker
         p.start()
-        del split[0]
     del split
     # wait for each worker to finish
     for p in workers:

@@ -1,9 +1,15 @@
 import json
 import re
-import math
-import rank_bm25
 import nltk
-import datetime
+import os 
+
+from elasticsearch import Elasticsearch
+
+# Global variables for multiprocessing
+SPLITS = min(os.cpu_count(), 8)
+
+# defines as a global variable for the multiprocessing
+es = Elasticsearch(maxsize=128, timeout=64, max_retries=16, retry_on_timeout=True)
 
 
 def preprocess(doc):
@@ -15,10 +21,11 @@ def preprocess(doc):
 
 
 def loadData(filelocation):
-    """Loads a json training dataset and returns it as a list of dictionaries.
-    The keys are:
+    """Loads a JSON file
 
-    'ID', 'question', 'category', 'type'
+    Takes a filelocation as a string
+    
+    Returns the file as a list of dictionaries
     """
     with open(filelocation, 'r', encoding='utf-8') as file:
         f = json.load(file)
@@ -27,8 +34,9 @@ def loadData(filelocation):
 
 
 def writeData(filelocation, dictionary):
-    """Takes a filelocation and a dictionary and turns it into a json file
-        have to make sure when making the dict that its the correct format.
+    """Write a JSON file
+
+    Takes a list of dictionaries
     """
     # set the indent so that it looks pretty
     json_object = json.dumps(dictionary, indent=2)
@@ -48,86 +56,92 @@ def progressPrint(index, length, procnum):
         print('something went wrong with the progress printout in process', procnum)
 
 
-def splitFunc(a, n):
-    """splits list 'a' into 'n' pieces
+def answerList(quesList, procNum, retDict):
+    """Answers a list of questions
+    
+    Takes a list of dictionaries with questions, a process number and a dictionary to return to
 
-    returns a Generator which needs to be converted back to a list
-
-    from: https://stackoverflow.com/a/2135920
+    returns a list of dicts with the answers
     """
-    if n == 1:
-        return a
-    k, m = divmod(len(a), n)
-    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
-
-
-def answerQuery(query, train, procNum):
-    """Takes a question and the training dataset and finds the highest score match from the training dataset
-
-    Returns the category, type and score of a question
-    """
-    query = preprocess(str(query['question']))
-    scoreA = -1.0
-    categoryA = 'boolean'
-    typeA = 'boolean'
-    # catch zerodivision errors to avoid termination
-    try:
-        bm25 = rank_bm25.BM25Okapi(query)
-    except ZeroDivisionError as e:
-        print('Zero division while creating instance in process ', procNum)
-        print('Question id: ', query['id'])
-        print(e)
-        # we'll just use a default category, type and score
-        return categoryA, typeA, scoreA
-    # iterate through the training dataset
-    for j in train:
-        # compare the query to the entry in the training dataset
-        scores = bm25.get_scores(j['question'])
-        # sum the score and compare if it has improved
-        scoresSum = math.fsum(scores)
-        if scoresSum > scoreA:
-            scoreA = scoresSum
-            categoryA = j['category']
-            typeA = j['type']
-    return categoryA, typeA, scoreA
-
-
-def answerList(quesList, train, procNum, retDict):
-    """Takes a list of questions, a list of the training dataset, the process number and the dictionary it will return
-    and tries to classify the questions
-
-    Returns a dictionary with the process id as key with the modified input list as value
-    """
-    num_questions = len(quesList)
-    # ranges through the questions, we need the iterator to save answers to the list
+    # length for progress print
+    length = len(quesList)
+    # range through the questions
     for i, j in enumerate(quesList):
-        # prints out the progress of question answering, taken from A2.1
-        progressPrint(i, num_questions, procNum)
+        progressPrint(i, length, procNum)
         # answer the question
-        category, type, score = answerQuery(j, train, procNum)
-        # add the category, type and score to the current question entry
+        category, type, score = answerQuery(j)
+        # save the answers to the same list as used for input
         quesList[i]['category'] = category
         quesList[i]['type'] = type
         quesList[i]['score'] = score
-    # return the dict with the process number as key
+    # reuturn
     retDict[procNum] = quesList
 
 
-# going to be replaced
-def findTypeIDList(quesList, bm25object):
-    length = len(quesList)
-    for i, j in enumerate(quesList):
-        progressPrint(i, length, 0)
-        if j['category'] == 'resource':
-            print('started resource', datetime.datetime.now())
-            idx = 0
-            scoreT = -1.0
-            best = bm25object.get_top_n(tokenized_query, corpus, n=1)
-            for k, m in enumerate(scores):
-                if m > scoreT:
-                    idx = k
-                    scoreT = m
-            quesList[i]['typeID'] = idx
-            quesList[i]['scoreType'] = scoreT
-            print('finished resource', datetime.datetime.now())
-    return quesList
+def answerQuery(question):
+    """Answers a query using elasticsearch
+
+    Takes a query
+
+    Returns a category, type and score for the query
+    """
+    # preprocess the question to remove any special characters
+    query = preprocess(str(question['question']))
+    # default return values in case of some error
+    qCategory = 'boolean'
+    qType = 'boolean'
+    qScore = -1.0
+
+    # if the preprocess emptied the whole query
+    if query == '':
+        return qCategory, qType, qScore
+
+    # use elasticsearch search to find the best match for the query with the built in BM25 scoring.
+    # it first searches the training datasets that were indexed previously
+    res = es.search(index='train', q=query, df="question", _source=False)['hits']['hits']
+
+    # find the best matching document by its ID
+    try:
+        bestMatchDoc = es.get(id=res[0]['_id'], index='train')['_source']
+    except Exception as e:
+        # if it couldn't find it for whatever reason just return defaults
+        print('Exception: ', e)
+        return qCategory, qType, qScore
+
+    # set the category, type and score
+    qCategory = bestMatchDoc['category']
+    qType = bestMatchDoc['type']
+    qScore = res[0]['_score']
+
+    # if its a resource then we will try to find types in the abstracts index
+    if qCategory == 'resource':
+        qType = resourceTypes(query)
+    return qCategory, qType, qScore
+
+
+
+def resourceTypes(query):
+    """Searches the abstracts index for the best matching types for a resource
+
+    Takes a query
+
+    Returns a list of types
+    """
+    # search for the best match
+    res = es.search(index='abstracts', q=query, df="description", _source=False, size=6)['hits']['hits']
+    types = []
+    # range through the top 6 results
+    for i in range(6):
+        # sometimes there are less than 6 results so we need to catch exceptions
+        try:
+            # takes the type from the top result
+            qtype = (es.get(id=res[i]['_id'], index='abstracts')['_source']['type'])
+            # for each type in the types 
+            for j in qtype:
+                # if it is not already a type and the total length of types in less than 6
+                if j not in types and len(types) < 6:
+                    # add the type
+                    types.append(j)
+        except Exception as e:
+            print('Exception: ', e)
+    return types

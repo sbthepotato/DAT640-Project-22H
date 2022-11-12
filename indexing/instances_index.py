@@ -11,24 +11,14 @@ INDEX_NAME = 'instances'
 INDEX_SETTINGS = {
     "mappings": {
         "properties": {
-            "description": {
+            "type": {
                 "type": "text", 
-                "term_vector": "no", 
+                "term_vector": "yes", 
                 "analyzer": "keyword"
             }
         }
     }
 }
-
-# defined as a global variable for the multiprocessing
-es = Elasticsearch(maxsize=MAX_CONNECTS, timeout=30, max_retries=10, retry_on_timeout=True)
-
-# has to be in this file due to the elasticsearch instance
-def elastic_index(doc, procNum):
-    length = len(doc)
-    for i, j in enumerate(doc):
-        progressPrint(i, length, procNum)
-        es.index(index=INDEX_NAME, id=j['id'], document=j)
 
 
 if __name__=="__main__":
@@ -44,15 +34,15 @@ if __name__=="__main__":
     # load the instances
     instances = loadDataJSON('../datasets/DBpedia/dbpedia_instance_types.json')
     # split the instances into SPLITS new lists
-    split = list(splitFunc(instances, SPLITS))
+    split = list(splitFunc(instances, SPLITS_index))
     # clear instances from memory
     del instances
 
     # creates a list of workers (processes)
     workers = []
-    for i in range(SPLITS):
+    for i in range(SPLITS_index):
         # indexes the instances
-        p = multiprocessing.Process(target=elastic_index, args=(split[0], i, ))
+        p = multiprocessing.Process(target=elastic_index, args=(split[0], INDEX_NAME, i, ))
         # add to the list of workers
         workers.append(p)
         # start the worker
