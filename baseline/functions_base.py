@@ -51,6 +51,8 @@ def progressPrint(index, length, procnum):
         print('something went wrong with the progress printout in process', procnum)
 
 
+
+
 #######################################
 #                                     #
 # The functions below this point are  #
@@ -71,8 +73,9 @@ def answerList(quesList, procNum, retDict):
     for i, j in enumerate(quesList):
         progressPrint(i, length, procNum)
         # answer the question
-        category, type, score = answerQuery(j)
+        category, type, score, query = answerQuery(j)
         # save the answers to the same list as used for input
+        quesList[i]['question'] = query
         quesList[i]['category'] = category
         quesList[i]['type'] = type
         quesList[i]['score'] = score
@@ -89,26 +92,18 @@ def answerQuery(question):
     """
     # preprocess the question to remove any special characters
     query = preprocess(str(question['question']))
-    # default return values in case of some error
-    qCategory = 'boolean'
-    qType = 'boolean'
-    qScore = -1.0
 
     # if the preprocess emptied the whole query
-    if query == '':
-        return qCategory, qType, qScore
+    if len(query) == 0:
+        print('questionID: ', question['id'], ' is empty after preprocess')
+        return 'resource', ['dbo:Thing'], -1.0, ' '.join(query)
 
     # use elasticsearch search to find the best match for the query with the built in BM25 scoring.
     # it first searches the training datasets that were indexed previously
     res = es.search(index='train', q=query, df="question", _source=False)['hits']['hits']
 
     # find the best matching document by its ID
-    try:
-        bestMatchDoc = es.get(id=res[0]['_id'], index='train')['_source']
-    except Exception as e:
-        # if it couldn't find it for whatever reason just return defaults
-        print('Exception: ', e)
-        return qCategory, qType, qScore
+    bestMatchDoc = es.get(id=res[0]['_id'], index='train')['_source']
 
     # set the category, type and score
     qCategory = bestMatchDoc['category']
@@ -118,8 +113,7 @@ def answerQuery(question):
     # if its a resource then we will try to find types in the abstracts index
     if qCategory == 'resource':
         qType = resourceTypes(query)
-    return qCategory, qType, qScore
-
+    return qCategory, qType, qScore, ' '.join(query)
 
 
 def resourceTypes(query):
@@ -129,21 +123,31 @@ def resourceTypes(query):
 
     Returns a list of types
     """
-    # search for the best match
-    res = es.search(index='abstracts', q=query, df="description", _source=False, size=6)['hits']['hits']
+    # search for the 20 best matches
+    res = es.search(index='abstracts', q=query, df="description", _source=False, size=20)['hits']['hits']
     types = []
-    # range through the top 6 results
-    for i in range(6):
-        # sometimes there are less than 6 results so we need to catch exceptions
-        try:
-            # takes the type from the top result
-            qtype = (es.get(id=res[i]['_id'], index='abstracts')['_source']['type'])
-            # for each type in the types 
-            for j in qtype:
-                # if it is not already a type and the total length of types in less than 6
-                if j not in types and len(types) < 6:
-                    # add the type
-                    types.append(j)
-        except Exception as e:
-            print('Exception: ', e)
+    # range through the results
+    for i in res:
+        # takes the type from the top result
+        qtype = es.get(id=i['_id'], index='abstracts')['_source']['type']
+        # for each type in the types 
+        for j in qtype:
+            # if it is not already a type and the total length of types is less than 10
+            if j not in types and len(types) < 10:
+                # add the type
+                types.append(j)
+    types = dboResourceTypes(types)
     return types
+
+
+def dboResourceTypes(types):
+    """Adds 'dbo:' to the start of the resource types
+    
+    Takes a list of types
+
+    Returns a list of types with 'dbo:' at the start of each type
+    """
+    converted = []
+    for i in types:
+        converted.append('dbo:' + i)
+    return converted

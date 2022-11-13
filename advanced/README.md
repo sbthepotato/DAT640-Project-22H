@@ -15,12 +15,14 @@ TBA TODO
 
 ## Evaluation results
 
+**Still work in progress!**
+
 &emsp;Category prediction (based on 4369 questions)
 
-&emsp;&emsp; Accuracy: 0.X
+&emsp;&emsp; Accuracy: 0.940
 
 &emsp;Type ranking (based on 4369 questions)
 
-&emsp;&emsp; NDCG@5:  0.Y
+&emsp;&emsp; NDCG@5:  0.524
 
-&emsp;&emsp; NDCG@10: 0.Z
+&emsp;&emsp; NDCG@10: 0.538

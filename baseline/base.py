@@ -1,9 +1,9 @@
 from functions_base import *
+import os
 import time
 import datetime
 import multiprocessing
 import numpy
-import os
 
 
 if __name__=="__main__":
@@ -30,6 +30,7 @@ if __name__=="__main__":
     workers = []
     for i in range(nr_splits):
         # predicts category and type of question list based on training dataset and BM25 scoring
+        # also turn the split lists back into normal lists
         p = multiprocessing.Process(target=answerList, args=(split[i].tolist(), i, retDict))
         # add to the list of workers
         workers.append(p)

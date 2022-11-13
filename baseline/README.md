@@ -24,6 +24,6 @@ The functions have been commented on and so has the code to explain the logic.
 
 &emsp;Type ranking (based on 4369 questions)
 
-&emsp;&emsp; NDCG@5:  0.393
+&emsp;&emsp; NDCG@5:  0.487
 
-&emsp;&emsp; NDCG@10: 0.393
+&emsp;&emsp; NDCG@10: 0.489
