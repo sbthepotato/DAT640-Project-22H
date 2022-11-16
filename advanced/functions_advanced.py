@@ -75,7 +75,7 @@ def answerQuery(question):
         qType = resourceTypes(query, qType, qScore)
     elif qCategory =='literal':
         if checkForTermSequence(query, 'when', 'is'):
-            return 'literal', ['date'], 69.0, ' '.join(query)
+            return 'literal', ['date'], qScore, ' '.join(query)
 
     return qCategory, qType, qScore, ' '.join(query)
 

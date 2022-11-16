@@ -1,5 +1,6 @@
-# Evaluation scripts
+# Evaluation Script DBpedia
 
-`dbpedia/` contains the DBpedia evaluation scripts and `wikidata/` contains the Wikidata evaluation scripts. Information on how to run the evaluation can be found within each directory.
+- `base_eval.py` evaluate the base algorithm implementation on the DBpedia dataset
+- `advanced_eval.py` evaluate the advanced algorithm implementation on the DBpedia dataset
 
-**NOTE:** The Wikidata dataset has not been classified so there is nothing of value in that directory.
+Both of these should work out of the box if you have not touched the directory structure as it came.
