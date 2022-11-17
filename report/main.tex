@@ -105,9 +105,25 @@ A boolean can only have boolean as a type. Meanwhile a literal could be expectin
 %% finish up until here for deadline 1
 \section{Baseline Method}
 %Explain what you are taking as your baseline method, as well as why this is a reasonable baseline, and why you are making specific implementation choices.
-The baseline method used is a basic BM25 implementation from the $rank-bm25$ Python library. The reason for using normal BM25 instead of BM25F or BM25+ is that these modifications aim to improve BM25's performance on multi fielded documents or when dealing with documents with large variance in length but this is not something we need to take into account here.
+First we must create two different indices for each stage of question classification. The first index is a collection of both the DBpedia and the Wikidata training dataset. These datasets get combined and each question gets preprocessed. The preprocessing simply removes any punctuation and stems the questions using the Porter Stemmer. No stop word removal is done because they could be important to understanding the question. After the preprocessing the questions get indexed using Elasticsearch where their document id will be the training set question id and then the document will have a field containing the question, the category and its types. 
 
-The input questions and the training data was preprocessed to make it lower case, remove punctuation, stem them and return each question as a list of words. Stopwords are not being removed because questions are so short that the stopwords become a useful part of the context of the question. The results from the preprocessing and the BM25 scoring can be seen in table \ref{tab:baseline_res}
+The second index is a collection of descriptions and types belonging to descriptions from a DBpedia data dump. First we take the dump of instances from DBpedia where a page is linked to a type and we 'clean' this list where we will merge entries that have multiple types. Then we will take the dump of abstracts that links a page to a description. This description will get preprocessed like before except this time the preprocessing also removes stop words so that the descriptions should primarily contain key-words. For each description id we check if we there is a match with the same id in the instances list. If there is then we add the corresponding types to the description, if not then we don't index the description. 
+
+\hfill \break
+For clarity of which dataset is being talked about going forward. A 'question' is referring to a question from the indexed training datasets. A 'query' is referring to a question from the test dataset which is being classified. 
+\hfill \break
+
+Once these indices are in place we can start actually classifying the queries. The first step is to compare the queries to the indexed training dataset. We will use the Elasticsearch \emph{search} function which uses BM25 scoring to create a list of the most relevant questions relative to the query. We simply take the first result from \emph{search} and we use Elasticsearch \emph{get} to retrieve the category and type of the question which best matched the query.
+
+From here we enter the second stage of classification. If the category from the first stage is either 'boolean' or 'literal' we don't do any further classification. If the category is 'resource' then we will clear the existing list of types and replace them in the following way:
+
+In the second stage of classification will only apply if the category is a 'resource'. What is done here is again we will us Elasticsearch \emph{search} to find the best match for the query. But instead of searching the questions from the training datasets we now search the indexed collection of descriptions and types from the DBpedia data dump. The other difference for the second stage is that instead of only taking the top result, we will now try to take the top 20 results. For each result we will again use Elasticsearch \emph{get} to retrieve the types of a document, then we will iterate through each type and add it to the list of types for the query. If the type already exists in the type list then we don't add it to avoid redundancy. We will also stop adding types once the type list has 10 entries in it due to the evaluating only considering up to 10 types. 
+
+\hfill \break
+
+The reason that we first compare the query to the training questions and then to the DBpedia data dump is to try to prioritise getting the "easier" categories where there are only 1 or 3 possible types correct. Doing the category prediction first using the training datasets seemed like the most intuitive way of achieving this. 
+
+Then for the second stage, the reason we go through up to 20 results from the DBpedia data dump, even though we only want to take 10 types from the results, is that it was chosen to try to prioritise getting a better $NDCG@10$ score by trying to make sure that the classification will try to "guess" as many types as possible. Depending on the amount of results we won't necessarily get 10 types but we always try to get this many to give as many "relevant enough" types as possible. 
 
 \begin{table}[h]
     \centering
@@ -120,17 +136,16 @@ The input questions and the training data was preprocessed to make it lower case
     \label{tab:baseline_res}
 \end{table}
 
-In the baseline method the category and type predictions were not done separately. This means that when the program is scoring the question against each question in the training dataset it simply takes the category and types from the highest matched question without any other modifications.
-
-Additionally the scoring is done by multiple parallel processes using the standard multiprocessing library. This allows the algorithm to finish processing the dataset much faster. While this doesn't improve the score this will be useful to more quickly test any changes being made in the advanced method and see if they improve the results as expected.
-
-
+We can see the results for the baseline methods in table \ref{tab:baseline_res}. Here we can see that the category prediction is correct a large majority of the time. The type prediction meanwhile performs worse and differently depending on how many types we consider. The results are slightly better when we look at the score for 10 types instead of 5, this makes sense considering the focus on "guessing" as many types as possible.
 
 % finish up until here for deadline 2
 \section{Advanced Method}
 %Explain what you are taking as your advanced method(s), as well as why this is a promising attempt to outperform the baseline method, and why you are making specific implementation choices.
+For the advanced method we make some changes to the category and type prediction in an attempt to fine tune the results. First of all in the category prediction, before we search the indexed collection of questions, we check if the query contains the words 'how many' after each other. The chance that somebody is asking 'how many x' and isn't expecting a number as a response was decided to be almost 0. So these 2 words coming after each other will always return 'literal' as the category and 'number' as the type. 
 
-trying to weigh answer type based on the first word of a question (who, where, what, why) 
+Additionally during the category prediction we will now attempt to re-weigh the scoring by looking at the first word of the question. First the initial \emph{search} will take the top 10 results instead of only the top result. For each of these results we will save the top result from each category if it exists. From there for each top result for a given category we will increase the score based on the first word in the query. 
+
+The score increases were decided by analysing the training dataset and first finding the words that would most commonly appear at the start of sentences. Then we would check each word to see how often it appears in a given category. For example we found that when the first word is 'give' it is a 'resource' 66\% of the time and a 'literal' 33\% of the time. These values would be used for the score increases. So if a word was a resource 66\% of the time we would increase the score by $6.6$. The minimum score increase is 0.1 if it appears 1\% of the time and 10 if it was 100\% of the time. 
 
 \begin{table}[h]
     \centering
@@ -138,7 +153,7 @@ trying to weigh answer type based on the first word of a question (who, where, w
     \begin{tabular}{c|c|c}
     $Accuracy$ & $NDCG@5$ & $NDCG@10$ \\
     \hline
-    TODO & TODO & TODO
+    0.940 & 0.524 & 0.538
     \end{tabular}
     \label{tab:baseline_res}
 \end{table}
@@ -154,9 +169,8 @@ trying to weigh answer type based on the first word of a question (who, where, w
 \begin{tabular}{l|c|c|c}
      & $Accuracy$ & $NDCG@5$ & $NDCG@10$ \\
     \hline
-    Baseline & 0.342 &  0.113 & 0.112 \\
-    Advanced Method & TODO & TODO &  TODO \\
-    Advanced Method 1 & \textbf{TODO} & \textbf{TODO} & \textbf{TODO} 
+    Baseline & 0.916 &  0.487 & 0.489 \\
+    Advanced Method & 0.940 & 0.524 &  0.538 \\
 \end{tabular}
 \label{table:1}
 \end{center}
