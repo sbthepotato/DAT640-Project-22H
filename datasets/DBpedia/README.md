@@ -15,7 +15,7 @@
 - `smarttask_dbpedia_test_questions.json` - contains the questions that need to be classified
 - `smarttask_dbpedia_test.json` - contains the correct category and type for each question
 - `smarttask_dbpedia_train.json` - contains the training dataset
-- - `smarttask_dbpedia_test_answers_advanced.json` - contains the category and type predictions from the advanced method
+- `smarttask_dbpedia_test_answers_advanced.json` - contains the category and type predictions from the advanced method
 - `smarttask_dbpedia_test_answers_base.json` - contains the category and type predictions from the baseline method
 
 ## Optional files
