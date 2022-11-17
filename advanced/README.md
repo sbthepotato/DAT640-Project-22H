@@ -4,7 +4,7 @@
 
 **NOTE: Elasticsearch needs to be running for this to work, go to the root directory for instructions.**
 
-TBA TODO
+Advanced method uses the same BM25 scoring as in the baseline method, we additionally re-weigh the scores based on the the first word in each question and we add the types from the training dataset.
 
 ## files
 
@@ -15,7 +15,19 @@ TBA TODO
 
 ## Evaluation results
 
-**Still work in progress!**
+### Category prediction improvements
+
+&emsp;Category prediction (based on 4369 questions)
+
+&emsp;&emsp; Accuracy: 0.940
+
+&emsp;Type ranking (based on 4369 questions)
+
+&emsp;&emsp; NDCG@5:  0.499
+
+&emsp;&emsp; NDCG@10: 0.501
+
+### Category & Type prediction improvements
 
 &emsp;Category prediction (based on 4369 questions)
 
