@@ -1,4 +1,4 @@
-# DAT640 Project 2022H Team-018
+# DAT640 Project 2022H
 
 These are all the files for the project in 'DAT640-Information retrieval and text mining` at UiS in Autumn 2022
 
